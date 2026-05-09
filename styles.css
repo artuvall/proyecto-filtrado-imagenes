@@ -1,0 +1,390 @@
+/*
+variables globales
+*/
+
+:root {
+  --color-fondo: #FBF5E7;
+  --color-superficie: #fffdf8;
+  --color-superficie-2: #f6f1e8;
+  --color-texto: #1f1a17;
+  --color-texto-suave: #5f5a55;
+  --color-borde: rgba(0, 0, 0, 0.08);
+
+  --color-azul: #aec6cf;
+  --color-rosa: #f49ac2;
+  --color-amarillo: #ffd88a;
+  --color-verde: #bfe3c0;
+  --color-oscuro: #1a1a1a;
+
+  --sombra-suave: 0 10px 30px rgba(0, 0, 0, 0.03);
+  --radio-grande: 28px;
+  --radio-mediano: 22px;
+  --radio-pequeno: 16px;
+  --ancho-maximo: 1200px;
+
+  --fuente-titulos: "Playfair Display", serif;
+  --fuente-cuerpo: "Outfit", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--fuente-cuerpo);
+  background:
+  /*
+    radial-gradient(circle at top left, rgba(244, 154, 194, 0.16), transparent 20%),
+    radial-gradient(circle at top right, rgba(174, 198, 207, 0.18), transparent 24%),
+    */
+    var(--color-fondo);
+  color: var(--color-texto);
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--fuente-titulos);
+  letter-spacing: -0.02em;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/*
+ancho y separacion general
+*/
+
+.contenedor {
+  width: min(100% - 32px, var(--ancho-maximo));
+  margin: 0 auto;
+}
+
+.hero {
+  padding: 52px 0 20px;
+}
+
+.principal {
+  display: grid;
+  gap: 24px;
+  padding-bottom: 40px;
+}
+
+.pie {
+  padding: 10px 0 36px;
+  color: var(--color-texto-suave);
+}
+
+/*
+tipografia y etiquetas
+*/
+
+.etiqueta-superior,
+.mini-etiqueta,
+.insignia,
+.texto-ayuda {
+  font-family: var(--fuente-cuerpo);
+}
+
+.etiqueta-superior {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  box-shadow: var(--sombra-suave);
+  color: var(--color-texto-suave);
+  font-size: 0.92rem;
+  margin-bottom: 18px;
+}
+
+.hero h1 {
+  font-size: clamp(2.3rem, 5vw, 4.8rem);
+  line-height: 0.98;
+  margin-bottom: 14px;
+}
+
+.hero-texto {
+  max-width: 760px;
+  color: var(--color-texto-suave);
+  font-size: 1.08rem;
+}
+
+.texto-suave,
+#textoEstadoImagen,
+.texto-ayuda {
+  color: var(--color-texto-suave);
+}
+
+.texto-resultado {
+  color: var(--color-texto);
+  margin-bottom: 18px;
+  font-weight: 600;
+}
+
+/*
+los bordes redondeados y sombras de los cards
+*/
+
+.tarjeta {
+  background: rgba(255, 253, 248, 0.88);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-grande);
+  padding: 24px;
+  box-shadow: var(--sombra-suave);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.tarjeta:hover {
+  transform: translateY(-2px);
+}
+
+.tarjeta-destacada {
+  background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(248,243,234,0.96));
+}
+
+.subtarjeta {
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-mediano);
+  padding: 18px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
+}
+
+.cabecera-tarjeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.cabecera-tarjeta h2 {
+  margin-bottom: 0;
+  font-size: 2rem;
+}
+
+.mini-etiqueta {
+  font-size: 0.86rem;
+  color: var(--color-texto-suave);
+  margin-bottom: 8px;
+}
+
+.insignia {
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  border: 1px solid var(--color-borde);
+  white-space: nowrap;
+}
+
+.insignia.azul { background: var(--color-azul); }
+.insignia.rosa { background: var(--color-rosa); }
+.insignia.amarilla { background: var(--color-amarillo); }
+.insignia.verde { background: var(--color-verde); }
+
+/*
+orden para por si se abre en telefono
+*/
+
+.rejilla-2,
+.bloque-matrices {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+/*
+botones
+*/
+
+.zona-carga {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+  align-items: center;
+}
+
+#inputImagen {
+  width: min(100%, 360px);
+  border: 1px solid var(--color-borde);
+  background: white;
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.boton {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.boton:hover {
+  transform: translateY(-1px) scale(1.01);
+}
+
+.boton-oscuro {
+  background: var(--color-oscuro);
+  color: white;
+}
+
+.boton-pastel {
+  color: var(--color-oscuro);
+}
+
+.boton-pastel.rosa {
+  background: var(--color-rosa);
+}
+
+.fila-botones,
+.grupo-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.boton-filtro {
+  background: white;
+  color: var(--color-texto);
+  border: 1px solid var(--color-borde);
+  min-width: 140px;
+}
+
+.boton-filtro:nth-child(1) { background: #eef6f8; }
+.boton-filtro:nth-child(2) { background: #fff1f7; }
+
+.boton-filtro.activo {
+  background: var(--color-oscuro);
+  color: white;
+  transform: translateY(-1px);
+}
+
+/*
+mensajes alertas y updates
+*/
+
+.mensaje {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border-radius: 20px;
+  border: 1px solid var(--color-borde);
+  font-weight: 500;
+}
+
+.mensaje.exito {
+  background: rgba(191, 227, 192, 0.55);
+}
+
+.mensaje.alerta {
+  background: rgba(255, 216, 138, 0.55);
+}
+
+.mensaje.error {
+  background: rgba(244, 154, 194, 0.42);
+}
+
+/*
+canvas para ver el recorte 15x15
+*/
+
+#canvasOriginal,
+#canvasSelector {
+  width: 100%;
+  max-height: 520px;
+  object-fit: contain;
+  border: 1px solid var(--color-borde);
+  border-radius: 22px;
+  background: #f3eee4;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+#canvasRecorte,
+#canvasRecorteFinal,
+#canvasRecorteResultado,
+#canvasResultado {
+  width: min(100%, 340px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  border: 1px solid var(--color-borde);
+  border-radius: 22px;
+  background: #f3eee4;
+  image-rendering: pixelated;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+/*
+la matriz se muestra como tabla desplazable con celdas
+pequeñas y legibles
+*/
+
+.contenedor-tabla {
+  overflow: auto;
+  border: 1px solid var(--color-borde);
+  border-radius: 18px;
+  background: #fffdfa;
+  max-height: 520px;
+}
+
+.tabla-matriz {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-matriz td {
+  min-width: 34px;
+  height: 34px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  text-align: center;
+  font-size: 0.82rem;
+  padding: 4px;
+}
+
+/*
+permite ocultar secciones dinamicamente desde js (aparentemente util por si acaso)
+*/
+
+.oculto {
+  display: none !important;
+}
+
+/*
+las columnas para lo responsive
+*/
+
+@media (min-width: 900px) {
+  .rejilla-2,
+  .bloque-matrices {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  #contenedorMatricesIntermedias {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}

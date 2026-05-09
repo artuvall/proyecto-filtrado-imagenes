@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Filtrado de Imágenes — MA475 UPC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="contenedor">
+      <p class="etiqueta-superior">Matemática Computacional · MA475 · Grupo 2 </p>
+      <h1>Filtrado de Imágenes</h1>
+      <p class="hero-texto">
+        Para empezar, carga una imagen, el programa validará si está en escala de grises, selecciona manualmente un recorte de 15×15 píxeles
+        y aplica filtros espaciales.
+      </p>
+    </div>
+  </header>
+
+  <main class="contenedor principal">
+    <!--
+      -
+      PASO 1: CARGA DE IMAGEN
+      -
+      el usuario sube una imagen jpg o jpeg y el sistema valida
+      si está en escala de grises.
+    -->
+    <section class="tarjeta tarjeta-destacada">
+      <div class="cabecera-tarjeta">
+        <div>
+          <p class="mini-etiqueta">Paso 1</p>
+          <h2>Cargar imagen</h2>
+        </div>
+        <div class="insignia azul">JPG / JPEG</div>
+      </div>
+
+      <p class="texto-suave">
+        Sube una imagen en formato JPG o JPEG.
+      </p>
+
+      <div class="zona-carga">
+        <label for="inputImagen" class="boton boton-oscuro">Seleccionar imagen</label>
+        <input type="file" id="inputImagen" accept=".jpg,.jpeg,image/jpeg" />
+      </div>
+
+      <div id="mensajeValidacion" class="mensaje oculto"></div>
+
+      <div class="fila-botones">
+        <button id="botonConvertir" class="boton boton-pastel rosa oculto" type="button">
+          Convertir a escala de grises
+        </button>
+      </div>
+    </section>
+
+    <!--
+      -
+      PASO 2: IMAGEN ORIGINAL
+      -
+      Aqui se ve todavia la imagen original, mas que anda por si el usuario sube una color y en el
+      siguiente paso vea el cambio que se hizo.
+    -->
+    <section id="seccionOriginal" class="tarjeta oculto">
+      <div class="cabecera-tarjeta">
+        <div>
+          <p class="mini-etiqueta">Paso 2</p>
+          <h2>Imagen original</h2>
+        </div>
+        <div class="insignia amarilla">Vista previa</div>
+      </div>
+
+      <div class="rejilla-2">
+        <article class="subtarjeta">
+          <h3>Vista original</h3>
+          <canvas id="canvasOriginal"></canvas>
+        </article>
+
+        <article class="subtarjeta">
+          <h3>Estado de la imagen</h3>
+          <p id="textoEstadoImagen" class="texto-suave">
+            Aún no se ha procesado ninguna imagen.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <!--
+      -
+      PASO 3: SELECCIÓN DE RECORTE 15x15
+      -
+      para recortar a 15x15 pixeles como pedia el trabajo
+    -->
+    <section id="seccionSeleccionRecorte" class="tarjeta oculto">
+      <div class="cabecera-tarjeta">
+        <div>
+          <p class="mini-etiqueta">Paso 3</p>
+          <h2>Seleccionar recorte 15×15</h2>
+        </div>
+        <div class="insignia verde">Interactivo</div>
+      </div>
+
+      <p class="texto-suave">
+        Haz clic o arrastra sobre la imagen para mover el cuadro de selección. El recorte final siempre será de 15×15 píxeles.
+      </p>
+
+      <div class="rejilla-2">
+        <article class="subtarjeta">
+          <h3>Selector de recorte</h3>
+          <canvas id="canvasSelector"></canvas>
+          <p class="texto-ayuda">
+            Coordenada superior izquierda:
+            <span id="textoCoordenadas">x = 0, y = 0</span>
+          </p>
+        </article>
+
+        <article class="subtarjeta">
+          <h3>Zoom del recorte</h3>
+          <canvas id="canvasRecorte"></canvas>
+          <div class="fila-botones">
+            <button id="botonConfirmarRecorte" class="boton boton-oscuro" type="button">
+              Confirmar recorte seleccionado
+            </button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!--
+      -
+      PASO 4: RECORTE DIGITALIZADO
+      -
+      se muestra el recorte final y su matriz de intensidades
+    -->
+    <section id="seccionRecorte" class="tarjeta oculto">
+      <div class="cabecera-tarjeta">
+        <div>
+          <p class="mini-etiqueta">Paso 4</p>
+          <h2>Recorte digitalizado</h2>
+        </div>
+        <div class="insignia rosa">15×15</div>
+      </div>
+
+      <div class="rejilla-2">
+        <article class="subtarjeta">
+          <h3>Imagen recortada</h3>
+          <canvas id="canvasRecorteFinal"></canvas>
+        </article>
+
+        <article class="subtarjeta">
+          <h3>Matriz de intensidades</h3>
+          <div id="contenedorMatrizRecorte" class="contenedor-tabla"></div>
+        </article>
+      </div>
+    </section>
+
+    <!--
+      -
+      PASO 5: FILTROS DISPONIBLES
+      -
+    -->
+    <section id="seccionFiltros" class="tarjeta oculto">
+      <div class="cabecera-tarjeta">
+        <div>
+          <p class="mini-etiqueta">Paso 5</p>
+          <h2>Selección de filtro</h2>
+        </div>
+        <div class="insignia azul">Primera entrega</div>
+      </div>
+
+      <p class="texto-suave">
+        En este avance se muestran los filtros de suavizado: media y mediana.
+      </p>
+
+      <div class="grupo-botones">
+        <button class="boton boton-filtro" type="button" data-filtro="media">Media</button>
+        <button class="boton boton-filtro" type="button" data-filtro="mediana">Mediana</button>
+
+        <!--
+          por ahora laplaciano y sobel estan comentados
+        -->
+        <!-- <button class="boton boton-filtro" type="button" data-filtro="laplaciano">Laplaciano</button> -->
+        <!-- <button class="boton boton-filtro" type="button" data-filtro="sobel">Sobel</button> -->
+      </div>
+    </section>
+
+    <!--
+      -
+      PASO 6: RESULTADOS DEL FILTRADO
+      -
+      Aquí se muestra el antes y después del recorte procesado.
+    -->
+    <section id="seccionResultados" class="tarjeta oculto">
+      <div class="cabecera-tarjeta">
+        <div>
+          <p class="mini-etiqueta">Paso 6</p>
+          <h2>Resultados</h2>
+        </div>
+        <div class="insignia amarilla">Antes / Después</div>
+      </div>
+
+      <p id="tituloResultadoActual" class="texto-resultado">Aún no se ha aplicado ningún filtro.</p>
+
+      <div class="rejilla-2">
+        <article class="subtarjeta">
+          <h3>Recorte original</h3>
+          <canvas id="canvasRecorteResultado"></canvas>
+        </article>
+
+        <article class="subtarjeta">
+          <h3>Imagen filtrada</h3>
+          <canvas id="canvasResultado"></canvas>
+        </article>
+      </div>
+
+      <div class="bloque-matrices">
+        <article class="subtarjeta">
+          <h3>Matriz original</h3>
+          <div id="contenedorMatrizOriginalResultado" class="contenedor-tabla"></div>
+        </article>
+
+        <article class="subtarjeta">
+          <h3>Matriz filtrada</h3>
+          <div id="contenedorMatrizFiltrada" class="contenedor-tabla"></div>
+        </article>
+      </div>
+
+      <!--
+        aca habra laplaciano y sobel, algun dia.
+      -->
+      <div id="contenedorMatricesIntermedias" class="bloque-matrices oculto">
+        <article class="subtarjeta">
+          <h3 id="tituloIntermedia1">Matriz intermedia 1</h3>
+          <div id="contenedorIntermedia1" class="contenedor-tabla"></div>
+        </article>
+
+        <article class="subtarjeta">
+          <h3 id="tituloIntermedia2">Matriz intermedia 2</h3>
+          <div id="contenedorIntermedia2" class="contenedor-tabla"></div>
+        </article>
+
+        <article class="subtarjeta oculto" id="bloqueIntermedia3">
+          <h3 id="tituloIntermedia3">Matriz intermedia 3</h3>
+          <div id="contenedorIntermedia3" class="contenedor-tabla"></div>
+        </article>
+      </div>
+
+      <div class="fila-botones">
+        <button id="botonDescargar" class="boton boton-oscuro" type="button">
+          Descargar imagen filtrada
+        </button>
+      </div>
+    </section>
+  </main>
+  <footer class="pie">
+    <div class="contenedor">
+      <p>Integrantes: Jamanca, Renzo · Jaramillo, Diego · Carpio, Josué · Tapia, Oscar · Valladolid, Arturo</p>
+    </div>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
