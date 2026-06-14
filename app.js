@@ -449,7 +449,7 @@ function mostrarMatriz(matriz, idContenedor) {
 -
 FILTROS
 -
-filtros de media y mediana, por ahora
+filtros de media y mediana
 */
 
 /*
