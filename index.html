@@ -49,12 +49,6 @@
       </div>
 
       <div id="mensajeValidacion" class="mensaje oculto"></div>
-
-      <div class="fila-botones">
-        <button id="botonConvertir" class="boton boton-pastel rosa oculto" type="button">
-          Convertir a escala de grises
-        </button>
-      </div>
     </section>
 
     <!--
@@ -168,22 +162,18 @@
           <p class="mini-etiqueta">Paso 5</p>
           <h2>Selección de filtro</h2>
         </div>
-        <div class="insignia azul">Primera entrega</div>
+        <div class="insignia azul">Filtros</div>
       </div>
 
       <p class="texto-suave">
-        En este avance se muestran los filtros de suavizado: media y mediana.
+        Filtros de suavizado (media y mediana) y filtros de agudizamiento (laplaciano y sobel).
       </p>
 
       <div class="grupo-botones">
         <button class="boton boton-filtro" type="button" data-filtro="media">Media</button>
         <button class="boton boton-filtro" type="button" data-filtro="mediana">Mediana</button>
-
-        <!--
-          por ahora laplaciano y sobel estan comentados
-        -->
-        <!-- <button class="boton boton-filtro" type="button" data-filtro="laplaciano">Laplaciano</button> -->
-        <!-- <button class="boton boton-filtro" type="button" data-filtro="sobel">Sobel</button> -->
+        <button class="boton boton-filtro" type="button" data-filtro="laplaciano">Laplaciano</button>
+        <button class="boton boton-filtro" type="button" data-filtro="sobel">Sobel</button>
       </div>
     </section>
 
@@ -229,7 +219,7 @@
       </div>
 
       <!--
-        aca habra laplaciano y sobel, algun dia.
+        matrices intermedias para laplaciano y sobel
       -->
       <div id="contenedorMatricesIntermedias" class="bloque-matrices oculto">
         <article class="subtarjeta">

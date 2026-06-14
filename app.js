@@ -5,7 +5,6 @@ desde javaScript.
 
 const inputImagen = document.getElementById("inputImagen");
 const mensajeValidacion = document.getElementById("mensajeValidacion");
-const botonConvertir = document.getElementById("botonConvertir");
 const textoEstadoImagen = document.getElementById("textoEstadoImagen");
 
 const seccionOriginal = document.getElementById("seccionOriginal");
@@ -68,18 +67,6 @@ funciones correspondientes
 */
 
 inputImagen.addEventListener("change", cargarImagen);
-
-botonConvertir.addEventListener("click", () => {
-  if (!canvasTrabajo) return;
-
-  convertirAGrises(ctxTrabajo, canvasTrabajo.width, canvasTrabajo.height);
-
-  mostrarMensaje("La imagen fue convertida correctamente a escala de grises.", "exito");
-  botonConvertir.classList.add("oculto");
-  textoEstadoImagen.textContent = "La imagen original se conserva en el paso 2, pero desde el paso 3 en adelante se trabaja con la versión en escala de grises.";
-
-  prepararSelectorRecorte();
-});
 
 botonConfirmarRecorte.addEventListener("click", confirmarRecorteSeleccionado);
 
@@ -171,13 +158,15 @@ function cargarImagen(evento) {
       const esGris = verificarEscalaGrises(datos, canvasTrabajo.width, canvasTrabajo.height);
 
       if (esGris) {
-        mostrarMensaje("La imagen ya está en escala de grises.", "exito");
+        mostrarMensaje("La imagen está en escala de grises. Puedes continuar al recorte.", "exito");
         textoEstadoImagen.textContent = "La imagen cargada cumple la condición de escala de grises. Puedes continuar al recorte.";
         prepararSelectorRecorte();
       } else {
-        mostrarMensaje("La imagen no está en escala de grises. Puedes convertirla automáticamente.", "alerta");
-        textoEstadoImagen.textContent = "La imagen original se mantiene a color en el paso 2. Si la conviertes, desde el paso 3 en adelante se mostrará en escala de grises.";
-        botonConvertir.classList.remove("oculto");
+        /*
+          el enunciado pide rechazar la imagen si no esta en blanco y negro
+        */
+        mostrarMensaje("La imagen no está en escala de grises. Carga una imagen en blanco y negro.", "error");
+        textoEstadoImagen.textContent = "La imagen no cumple la condición de escala de grises, por lo que fue rechazada.";
       }
     };
 
@@ -189,10 +178,9 @@ function cargarImagen(evento) {
 
 /*
 -
-VALIDACION Y CONVERSION A ESCALA DE GRISES
+VALIDACION DE ESCALA DE GRISES
 -
-las funciones analizan si la imagen cumple la condicion
-de blanco y negro y bueno si no se da ofrece la conversion
+la funcion analiza si la imagen cumple la condicion de blanco y negro
 */
 
 /**
@@ -214,29 +202,6 @@ function verificarEscalaGrises(datos, ancho, alto) {
   }
 
   return true;
-}
-
-/*
-escala de grises vía fórmula sobre contexto de canvas (ancho/alto)
-sin retorno; mutación directa de píxeles
- */
-function convertirAGrises(ctx, ancho, alto) {
-  const imagenDatos = ctx.getImageData(0, 0, ancho, alto);
-  const datos = imagenDatos.data;
-
-  for (let i = 0; i < datos.length; i += 4) {
-    const r = datos[i];
-    const g = datos[i + 1];
-    const b = datos[i + 2];
-
-    const gris = Math.round(0.299 * r + 0.406 * g + 0.114 * b);
-
-    datos[i] = gris;
-    datos[i + 1] = gris;
-    datos[i + 2] = gris;
-  }
-
-  ctx.putImageData(imagenDatos, 0, 0);
 }
 
 /*
@@ -567,6 +532,142 @@ function aplicarFiltroMediana(matriz) {
 }
 
 /*
+aplica el filtro laplaciano 3x3 a una matriz
+recibe una matriz 2D y devuelve la matriz filtrada (puede tener valores fuera de rango)
+ */
+function aplicarFiltroLaplaciano(matriz) {
+  const filas = matriz.length;
+  const columnas = matriz[0].length;
+  const resultado = copiarMatriz(matriz);
+
+  /*
+    mascara laplaciana con diagonales, suma de coeficientes cero
+  */
+  const mascara = [
+    [1, 1, 1],
+    [1, -4, 1], /* se puede cambiar el -4 por -8 para un efecto más agresivo, pero se sale más del rango */
+    [1, 1, 1]
+  ];
+
+  for (let y = 1; y < filas - 1; y++) {
+    for (let x = 1; x < columnas - 1; x++) {
+      let suma = 0;
+
+      /*
+        se multiplica cada vecino 3x3 por su peso en la mascara
+      */
+      for (let j = -1; j <= 1; j++) {
+        for (let i = -1; i <= 1; i++) {
+          suma += matriz[y + j][x + i] * mascara[j + 1][i + 1];
+        }
+      }
+
+      resultado[y][x] = suma;
+    }
+  }
+
+  return resultado;
+}
+
+/*
+aplica el filtro de sobel 3x3 a una matriz
+recibe una matriz 2D y devuelve un objeto con las matrices gx, gy y magnitud
+ */
+function aplicarFiltroSobel(matriz) {
+  const filas = matriz.length;
+  const columnas = matriz[0].length;
+
+  const matrizGx = copiarMatriz(matriz);
+  const matrizGy = copiarMatriz(matriz);
+  const magnitud = copiarMatriz(matriz);
+
+  /*
+    mascaras de sobel para gradiente horizontal y vertical
+  */
+  const mascaraX = [
+    [-1, 0, 1],
+    [-2, 0, 2],
+    [-1, 0, 1]
+  ];
+
+  const mascaraY = [
+    [-1, -2, -1],
+    [0, 0, 0],
+    [1, 2, 1]
+  ];
+
+  for (let y = 1; y < filas - 1; y++) {
+    for (let x = 1; x < columnas - 1; x++) {
+      let gx = 0;
+      let gy = 0;
+
+      for (let j = -1; j <= 1; j++) {
+        for (let i = -1; i <= 1; i++) {
+          gx += matriz[y + j][x + i] * mascaraX[j + 1][i + 1];
+          gy += matriz[y + j][x + i] * mascaraY[j + 1][i + 1];
+        }
+      }
+
+      matrizGx[y][x] = gx;
+      matrizGy[y][x] = gy;
+
+      /*
+        magnitud aproximada del gradiente: |gx| + |gy|
+      */
+      magnitud[y][x] = Math.abs(gx) + Math.abs(gy);
+    }
+  }
+
+  return { matrizGx, matrizGy, magnitud };
+}
+
+/*
+reescala una matriz al rango 0 a 255 usando la recta entre minimo y maximo
+recibe una matriz 2D y devuelve una nueva matriz reescalada
+ */
+function reescalarMatriz(matriz) {
+  const filas = matriz.length;
+  const columnas = matriz[0].length;
+  const resultado = crearMatrizVacia(filas, columnas);
+
+  const L = 256;
+
+  /*
+    se busca el valor minimo y maximo de la matriz filtrada
+  */
+  let minimo = matriz[0][0];
+  let maximo = matriz[0][0];
+
+  for (let y = 0; y < filas; y++) {
+    for (let x = 0; x < columnas; x++) {
+      if (matriz[y][x] < minimo) minimo = matriz[y][x];
+      if (matriz[y][x] > maximo) maximo = matriz[y][x];
+    }
+  }
+
+  /*
+    si todos los valores son iguales se evita dividir entre cero
+  */
+  const rango = maximo - minimo;
+
+  for (let y = 0; y < filas; y++) {
+    for (let x = 0; x < columnas; x++) {
+      let valor;
+
+      if (rango === 0) {
+        valor = 0;
+      } else {
+        valor = ((matriz[y][x] - minimo) / rango) * (L - 1);
+      }
+
+      resultado[y][x] = Math.round(valor);
+    }
+  }
+
+  return resultado;
+}
+
+/*
 -
 PROCESAMIENTO DEL FILTRO SELECCIONADO
 -
@@ -595,6 +696,47 @@ function procesarFiltroSeleccionado(filtro) {
     tituloResultadoActual.textContent = "Resultado del filtro de Mediana";
     mostrarMatriz(matrizFiltrada, "contenedorMatrizFiltrada");
     matrizACanvas(matrizFiltrada, canvasResultado);
+  }
+
+  if (filtro === "laplaciano") {
+    /*
+      el laplaciano genera valores fuera de rango, por eso se reescala
+    */
+    const matrizFiltrada = aplicarFiltroLaplaciano(matrizRecorteActual);
+    const matrizReescalada = reescalarMatriz(matrizFiltrada);
+
+    tituloResultadoActual.textContent = "Resultado del filtro Laplaciano";
+    mostrarMatriz(matrizReescalada, "contenedorMatrizFiltrada");
+    matrizACanvas(matrizReescalada, canvasResultado);
+
+    /*
+      se muestran las matrices intermedias: filtrada y reescalada
+    */
+    mostrarMatricesIntermedias([
+      { titulo: "Matriz filtrada (sin reescalar)", matriz: matrizFiltrada },
+      { titulo: "Matriz reescalada", matriz: matrizReescalada }
+    ]);
+  }
+
+  if (filtro === "sobel") {
+    /*
+      sobel calcula los gradientes gx y gy, luego la magnitud y se reescala
+    */
+    const { matrizGx, matrizGy, magnitud } = aplicarFiltroSobel(matrizRecorteActual);
+    const matrizReescalada = reescalarMatriz(magnitud);
+
+    tituloResultadoActual.textContent = "Resultado del filtro Sobel";
+    mostrarMatriz(matrizReescalada, "contenedorMatrizFiltrada");
+    matrizACanvas(matrizReescalada, canvasResultado);
+
+    /*
+      se muestran las matrices intermedias: gradiente x, gradiente y y magnitud
+    */
+    mostrarMatricesIntermedias([
+      { titulo: "Gradiente Gx", matriz: matrizGx },
+      { titulo: "Gradiente Gy", matriz: matrizGy },
+      { titulo: "Magnitud |Gx| + |Gy|", matriz: magnitud }
+    ]);
   }
 }
 
@@ -666,8 +808,6 @@ function reiniciarInterfaz() {
   mensajeValidacion.textContent = "";
   mensajeValidacion.className = "mensaje oculto";
 
-  botonConvertir.classList.add("oculto");
-
   seccionOriginal.classList.add("oculto");
   seccionSeleccionRecorte.classList.add("oculto");
   seccionRecorte.classList.add("oculto");
@@ -704,6 +844,31 @@ function ocultarMatricesIntermedias() {
   contenedorIntermedia1.innerHTML = "";
   contenedorIntermedia2.innerHTML = "";
   contenedorIntermedia3.innerHTML = "";
+}
+
+/*
+muestra las matrices intermedias de los filtros de agudizamiento
+recibe un arreglo de objetos { titulo, matriz } de 2 o 3 elementos
+ */
+function mostrarMatricesIntermedias(lista) {
+  contenedorMatricesIntermedias.classList.remove("oculto");
+
+  tituloIntermedia1.textContent = lista[0].titulo;
+  mostrarMatriz(lista[0].matriz, "contenedorIntermedia1");
+
+  tituloIntermedia2.textContent = lista[1].titulo;
+  mostrarMatriz(lista[1].matriz, "contenedorIntermedia2");
+
+  /*
+    el tercer bloque solo se usa cuando hay tres matrices, como en sobel
+  */
+  if (lista.length > 2) {
+    bloqueIntermedia3.classList.remove("oculto");
+    tituloIntermedia3.textContent = lista[2].titulo;
+    mostrarMatriz(lista[2].matriz, "contenedorIntermedia3");
+  } else {
+    bloqueIntermedia3.classList.add("oculto");
+  }
 }
 
 /**
