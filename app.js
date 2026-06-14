@@ -532,25 +532,43 @@ function aplicarFiltroMediana(matriz) {
 }
 
 /*
+devuelve el valor de un vecino aplicando replicacion de borde
+si la posicion se sale de la matriz se usa el pixel valido mas cercano
+asi tambien se filtra el borde y no queda un marco sin procesar
+ */
+function obtenerVecino(matriz, y, x) {
+  const filas = matriz.length;
+  const columnas = matriz[0].length;
+
+  const filaValida = limitarValor(y, 0, filas - 1);
+  const columnaValida = limitarValor(x, 0, columnas - 1);
+
+  return matriz[filaValida][columnaValida];
+}
+
+/*
 aplica el filtro laplaciano 3x3 a una matriz
 recibe una matriz 2D y devuelve la matriz filtrada (puede tener valores fuera de rango)
  */
 function aplicarFiltroLaplaciano(matriz) {
   const filas = matriz.length;
   const columnas = matriz[0].length;
-  const resultado = copiarMatriz(matriz);
+  const resultado = crearMatrizVacia(filas, columnas);
 
   /*
     mascara laplaciana con diagonales, suma de coeficientes cero
   */
   const mascara = [
     [1, 1, 1],
-    [1, -4, 1], /* se puede cambiar el -4 por -8 para un efecto más agresivo, pero se sale más del rango */
+    [1, -8, 1],
     [1, 1, 1]
   ];
 
-  for (let y = 1; y < filas - 1; y++) {
-    for (let x = 1; x < columnas - 1; x++) {
+  /*
+    se recorre toda la matriz, incluido el borde, usando replicacion
+  */
+  for (let y = 0; y < filas; y++) {
+    for (let x = 0; x < columnas; x++) {
       let suma = 0;
 
       /*
@@ -558,7 +576,7 @@ function aplicarFiltroLaplaciano(matriz) {
       */
       for (let j = -1; j <= 1; j++) {
         for (let i = -1; i <= 1; i++) {
-          suma += matriz[y + j][x + i] * mascara[j + 1][i + 1];
+          suma += obtenerVecino(matriz, y + j, x + i) * mascara[j + 1][i + 1];
         }
       }
 
@@ -577,9 +595,9 @@ function aplicarFiltroSobel(matriz) {
   const filas = matriz.length;
   const columnas = matriz[0].length;
 
-  const matrizGx = copiarMatriz(matriz);
-  const matrizGy = copiarMatriz(matriz);
-  const magnitud = copiarMatriz(matriz);
+  const matrizGx = crearMatrizVacia(filas, columnas);
+  const matrizGy = crearMatrizVacia(filas, columnas);
+  const magnitud = crearMatrizVacia(filas, columnas);
 
   /*
     mascaras de sobel para gradiente horizontal y vertical
@@ -596,15 +614,19 @@ function aplicarFiltroSobel(matriz) {
     [1, 2, 1]
   ];
 
-  for (let y = 1; y < filas - 1; y++) {
-    for (let x = 1; x < columnas - 1; x++) {
+  /*
+    se recorre toda la matriz, incluido el borde, usando replicacion
+  */
+  for (let y = 0; y < filas; y++) {
+    for (let x = 0; x < columnas; x++) {
       let gx = 0;
       let gy = 0;
 
       for (let j = -1; j <= 1; j++) {
         for (let i = -1; i <= 1; i++) {
-          gx += matriz[y + j][x + i] * mascaraX[j + 1][i + 1];
-          gy += matriz[y + j][x + i] * mascaraY[j + 1][i + 1];
+          const valor = obtenerVecino(matriz, y + j, x + i);
+          gx += valor * mascaraX[j + 1][i + 1];
+          gy += valor * mascaraY[j + 1][i + 1];
         }
       }
 
